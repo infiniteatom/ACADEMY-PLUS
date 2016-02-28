@@ -30,14 +30,14 @@ static char	*create_line(char **buff)
 {
 	int		i;
 	char	*l;
-	
+
 	i = 0;
-	l = (char*)malloc(100000000);
+	l = (char *)malloc(100000000);
 	while (**buff != '\n' && **buff != 0)
 	{
 		l[i] = **buff;
 		i++;
-		*buff = *buff + 1;
+		*buff++;
 	}
 	return (l);
 }
@@ -45,25 +45,25 @@ static char	*create_line(char **buff)
 int			get_next_line(const int fd, char **s)
 {
 	static char	*buff;
-	char		*line;
-	int			rd;
+	char		*raw;
+	int			sd;
 	
 	if (fd < 0 || s == NULL)
 		return (-1);
-	*s = (char*)malloc(100000000);
+	*s = (char *)malloc(100000000);
 	if (!buff)
 		buff = (char*)malloc(100000000);
 	if (*buff == '\n')
 		buff++;
-	line = (char*)malloc(100000000);
-	rd = read(fd, buff + ft_strlen(buff), BUFF_SIZE);
-	if (rd < 0)
+	raw = (char*)malloc(100000000);
+	sd = read(fd, buff + ft_strlen(buff), BUFF_SIZE);
+	if (sd < 0)
 		return (-1);
-	while (rd > 0 && !has_new_line(buff))
-		rd = read(fd, buff + ft_strlen(buff), BUFF_SIZE);
-	line = create_line(&buff);
-	*s = ft_strcpy(*s, line);
-	if (rd == 0 && line[0] == 0 && *buff == 0)
+	while (sd > 0 && !has_new_line(buff))
+		sd = read(fd, buff + ft_strlen(buff), BUFF_SIZE);
+	raw = create_line(&buff);
+	*s = ft_strcpy(*s, raw);
+	if (sd == 0 && raw[0] == 0 && *buff == 0)
 		return (0);
 	return (1);
 }
