@@ -32,13 +32,19 @@ char	***extract_pieces(int i, int x, int y, int z)
 	{
 		y = 0;
 		while (buf[i] != '\n' && buf[i])
-			pieces[z][x][y++] = buf[i++];
+		{
+			pieces[z][x][y] = buf[i];
+			y++;
+			i++;
+		}
 		i++;
-		pieces[z][x++][y] = '\0';
-		if (buf[i++] == '\n')
+		pieces[z][x][y] = '\0';
+		x++;
+		if (buf[i] == '\n')
 		{
 			x = 0;
 			z++;
+			i++;
 		}
 	}
 	return (pieces);

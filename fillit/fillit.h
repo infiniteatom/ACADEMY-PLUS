@@ -22,13 +22,26 @@
 # define SIZE_PIECES (22 * 4 * 4)
 # define PIECES "pieces.txt"
 
+typedef struct	t_fillit
+{
+	char	***elem;
+	char	**matrix;
+	char	*str;
+	int		found;
+	int		l;
+	int		r;
+}				s_fillit;
+
 /*
 ** Extra functions
 */
 
 int		print_error(void);
 void	*ft_memset(void *b, int c, size_t len);
-void	print_matrix(char **square);
+void	swap(char *a, char *b);
+void	swap_2d_ext(char **a, char **b);
+void	swap_2d(char **a, char **b);
+void	print_matrix(char **square, int size);
 
 /*
 ** Functions for memory allocation
@@ -43,10 +56,13 @@ char	***alloc_three_d(char x, char y, char z);
 ** Functions to fill it
 */
 
+char	**alloc_matrix(char **matrix, int box);
+void	placeit(s_fillit obj, int y, int x);
 int		can_be_placed(char **square, char **elem, int x, int y);
-char	**fillit(char **matrix, char ***elem, int box);
+int		place(s_fillit obj);
+void	delete_last(s_fillit obj);
+void	fillit(s_fillit obj, char **matrix);
 char	**prepare(char ***elem, int min);
-int		min_box_size(char ***elem);
 
 /*
 ** Functions for validating

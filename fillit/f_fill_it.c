@@ -13,11 +13,74 @@
 #include "fillit.h"
 
 /*
-** Check is the Tetrimino can be placed in [x,y] position
-** May not work
+** Allocates memory for a matrix and put dots inside
+** Works
 */
 
-int		can_be_placed(char **square, char **elem, int x, int y)
+char	**alloc_matrix(char **matrix, int box)
+{
+	int		i;
+	int		j;
+
+	if (!(matrix = alloc_two_d(box, box)))
+		return (NULL);
+	i = 0;
+	while (i < box)
+	{
+		j = 0;
+		while (j < box)
+		{
+			matrix[i][j] = '.';
+			j++;
+		}
+		matrix[i][j] = '\0';
+		i++;
+	}
+	return (matrix);
+}
+
+/*
+** Place the tretriminos in the [x,y] position
+** May work
+*/
+
+void	placeit(s_fillit obj, int y, int x)
+{
+	int		i;
+	int		j;
+	int		k;
+
+	i = 0;
+	j = 0;
+	while (obj.elem[obj.l][0][j++] != '#')
+		x--;
+	k = x;
+	while (i < 4)
+	{
+		j = 0;
+		//printf("here    2\n");
+		//print_matrix(obj.elem[obj.l], 4);
+		while (j < 4)
+		{
+			//print_matrix(obj.matrix, 4);
+			//printf("\n");
+			if (obj.elem[obj.l][i][j] == '#')
+				obj.matrix[y][x] = obj.str[obj.l];
+			j++;
+			x++;
+		}
+		i++;
+		y++;
+		x = k;
+	}
+}
+
+/*
+** Check is the Tetrimino can be placed in [x,y] position
+** May work
+*/
+
+int		can_be_placed(char **square, char **elem, int y, int x)
 {
 	int		i;
 	int		j;
@@ -30,93 +93,152 @@ int		can_be_placed(char **square, char **elem, int x, int y)
 	if (x < 0)
 		return (0);
 	k = x;
-	while (elem[i])
+	while (i < 4)
 	{
+		printf("here    4\n");
 		j = 0;
-		while (elem[i][j])
-			if (elem[i][j++] == '#' && square[y][x++] == '#')
+		while (j < 4)
+		{
+			if (elem[i][j] == '#' && square[y][x] != '.')
 				return (0);
+			j++;
+			x++;
+		}
 		i++;
 		y++;
 		x = k;
 	}
+	printf("\nhere    5\n");
 	return (1);
 }
 
 /*
-** Allocates memory for a matrix and put dots inside
+** Place the elem where it can
+** If the elem was put, returns 1 else returns 0
+** May work
 */
 
-char	**alloc_matrix(char **matrix, int box)
+int		place(s_fillit obj)
 {
-	int		i;
+	int		x;
+	int		y;
 
-	if (!(matrix = (char **)malloc(box * sizeof(char *))))
-		return (NULL);
-	i = 0;
-	while (i < box)
+	y = 0;
+	while (obj.matrix[y])
 	{
-		if (!(matrix[i] = ft_memset((void *)matrix, '.', (size_t)box)))
-			return (NULL);
-		i++;
+		printf("here    2\n");
+		x = 0;
+		while (obj.matrix[y][x])
+		{
+			if (obj.matrix[y][x] == '.')
+			{
+				printf("here    3\n");
+				if (can_be_placed(obj.matrix, obj.elem[obj.l], y, x))
+				{
+					placeit(obj, y, x);
+					return (1);
+				}
+			}
+			x++;
+		}
+		y++;
 	}
-	return (matrix);
+	return (0);
+}
+
+/*
+** Delete the last piece inserted in matrix
+*/
+
+void	delete_last(s_fillit obj)
+{
+	int		x;
+	int		y;
+
+	y = 0;
+	while (obj.matrix[y])
+	{
+		x = 0;
+		while (obj.matrix[y][x])
+		{
+			if (obj.matrix[y][x] == obj.str[obj.l - 1])
+				obj.matrix[y][x] = '.';
+			x++;
+		}
+		y++;
+	}
 }
 
 /*
 ** Fill it!!!
+** May work
 */
 
-char	**fillit(char matrix[][], char ***elem, int y, int x)
+void	fillit(s_fillit obj, char **matrix)
 {
-	char	**matrix_out;
+	int		i;
 
-	if (matrix[y][x])
+	printf("l = %d\nr = %d\n", obj.l, obj.r);
+	printf("str = %s\n", obj.str);
+	i = obj.l;
+	if (obj.l == obj.r)
 	{
-		if (can_be_placed(matrix, *elem, x, y))
-		{
-			place_it(matrix, *elem, x, y);
-			fillit(matrix, elem, x, y);
-		}
-		else
-			fillit(matrix, elem, y, x++);
+		obj.found = 1;
+		matrix = obj.matrix;
 	}
 	else
-		fillit(matrix, elem, y, x);
-	matrix_out = alloc_matrix(matrix_out, box);
-	return (matrix_out);
+	{
+		while (i < obj.r || !obj.found)
+		{
+			swap((obj.str + obj.l), (obj.str + i));
+			swap_2d((obj.elem[obj.l]), (obj.elem[i]));
+			if (place(obj))
+			{
+				printf("here    1\n");
+				obj.l += 1;
+				fillit(obj, matrix);
+			}
+			if (!obj.found)
+				delete_last(obj);
+			swap((obj.str + obj.l), (obj.str + i));
+			swap_2d((obj.elem[obj.l]), (obj.elem[i]));
+		}
+	}
 }
 
 /*
 ** Alocates memory to fill it. Get it?
+** May work
 */
 
 char	**prepare(char ***elem, int min)
 {
-	char	**matrix;
-	char	a[min][min];
-
-	matrix = NULL;
-	if (!(matrix = fillit(a, elem, 0, 0)))
-		prepare(elem, min + 1);
-	return (matrix);
-}
-
-/*
-** Calculate the minimum size of the box that can be
-*/
-
-int		min_box_size(char ***elem)
-{
-	int		n;
-	int		i;
+	s_fillit	obj;
+	char		**matrix;
+	int			i;
 
 	i = 0;
-	n = 0;
-	while (elem[n])
-		n++;
-	n *= 4;
-	while ((i * i) < n)
+	while (elem[i])
 		i++;
-	return (i);
+	if (!(obj.str = (char *)malloc(i)))
+		return (NULL);
+	i = 0;
+	while (elem[i])
+	{
+		obj.str[i] = 'A' + i;
+		i++;
+	}
+	obj.str[i] = '\0';
+	obj.l = 0;
+	obj.r = i;
+	obj.found = 0;
+	obj.elem = elem;
+	if (!(obj.matrix = alloc_matrix(obj.matrix, min)))
+		return (NULL);
+	matrix = NULL;
+	printf("\n\n");
+	fillit(obj, matrix);
+	if (matrix)
+		return (matrix);
+	return (prepare(elem, min + 1));
 }

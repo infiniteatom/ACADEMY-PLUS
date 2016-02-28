@@ -23,8 +23,8 @@ void	free_two_d(char **data, char x)
 	i = 0;
 	while (i < x)
 	{
-		++i;
 		free(data[i]);
+		i++;
 	}
 	free(data);
 }
@@ -41,17 +41,17 @@ void	free_three_d(char ***data, char x, char y)
 	i = 0;
 	while (i < x)
 	{
-		++i;
 		if (!data[i])
 		{
 			j = 0;
 			while (j < y)
 			{
-				++j;
 				free(data[i][j]);
+				i++;
 			}
 			free(data[i]);
 		}
+		i++;
 	}
 	free(data);
 }
@@ -72,7 +72,7 @@ char	**alloc_two_d(char x, char y)
 		p[i++] = NULL;
 	i = 0;
 	while (i < x)
-		if (!(p[i++] = malloc(y * sizeof(*p[i]))))
+		if (!(p[i++] = malloc(sizeof(*p[i]) * (y + 1))))
 		{
 			free_two_d(p, x);
 			return (NULL);
